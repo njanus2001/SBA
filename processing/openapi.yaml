@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  description: This API provides event stats
+  version: "1.0.0"
+  title: GPS Reading API
+  contact:
+    email: njanus@my.bcit.com
+tags:
+  - name: gps device
+    description: Operations available to GPS devices
+
+paths:
+  /stats:
+    get:
+      summary: Gets the event stats
+      operationId: app.get_stats
+      description: Gets Location and Waypoint processed statistics
+      responses:
+        '200':
+          description: Successfully returned a list of GPS events
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/ReadingStats'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+components:
+  schemas:
+    ReadingStats:
+      required:
+      - num_location_readings
+      - num_waypont_readings 
+      - max_latitude
+      - min_latitude
+      - max_longitude
+      - min_longitude
+      properties:
+        num_location_readings:
+          type: integer
+          example: 250000
+        num_waypont_readings:
+          type: integer
+          example: 250000
+        max_latitude:
+          type: integer
+          example: 90
+        min_latitude:
+          type: integer
+          example: 0
+        max_longitude:
+          type: integer
+          example: 180
+        min_longitude:
+          type: integer
+          example: 0
+      type: object

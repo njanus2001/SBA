@@ -1,0 +1,11 @@
+version: 1
+datastore:
+  user: root
+  password: Password
+  hostname: njanus.eastus2.cloudapp.azure.com
+  port: 3306
+  db: events
+events:
+  hostname: njanus.eastus2.cloudapp.azure.com
+  port: 9092
+  topic: events

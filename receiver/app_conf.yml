@@ -1,0 +1,9 @@
+version: 1
+location:
+  url: http://localhost:8090/readings/location
+waypoint:
+  url: http://localhost:8090/readings/waypoint
+events:
+  hostname: njanus.eastus2.cloudapp.azure.com
+  port: 9092
+  topic: events

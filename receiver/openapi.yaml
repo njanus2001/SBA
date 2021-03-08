@@ -1,0 +1,108 @@
+openapi: 3.0.0
+info:
+  description: This API receives reading events from GPS devices
+  version: "1.0.0"
+  title: GPS Reading API
+  contact:
+    email: njanus@my.bcit.com
+tags:
+  - name: gps device
+    description: Operations available to GPS devices
+paths:
+  /readings/location:
+    post:
+      tags:
+        - gps device
+      summary: reports a gps location reading
+      operationId: app.report_gps_location_reading
+      description: Adds a new gps location reading to the system
+      responses:
+        '201':
+          description: item created
+        '400':
+          description: 'invalid input, object invalid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GPSLocationReading'
+        description: Reading item to create
+        
+  /readings/waypoint:
+    post:
+      tags:
+        - gps device
+      summary: reports a gps waypoint location reading
+      operationId: app.report_gps_waypoint_location
+      description: Adds a new gps waypoint location reading
+      responses:
+        '201':
+          description: item created
+        '400':
+          description: 'invalid input, object invalid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GPSWaypointLocationReading'
+        description: Reading item to create
+    
+components:
+  schemas:
+    GPSLocationReading:
+      type: object
+      required:
+        - user_id
+        - device_id
+        - latitude
+        - longitude
+        - timestamp
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        device_id:
+          type: string
+          example: A12345
+        latitude:
+          type: number
+          example: 49.29199347427707
+        longitude:
+          type: number
+          example: -122.39181518554689
+        timestamp:
+          type: string
+          format: date-time
+          example: '2021-01-27 21:40:55.242024'
+
+    GPSWaypointLocationReading:
+      type: object
+      required:
+        - user_id
+        - device_id
+        - name
+        - latitude
+        - longitude
+        - timestamp
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        device_id:
+          type: string
+          example: A12345
+        name:
+          type: string
+          example: 'Mt Robie Reid'
+        latitude:
+          type: number
+          example: 49.29199347427707
+        longitude:
+          type: number
+          example: -122.39181518554689
+        timestamp:
+          type: string
+          format: date-time
+          example: '2021-01-27 21:40:55.242024'
