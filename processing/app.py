@@ -9,6 +9,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import os.path
 from os import path
 import datetime
+from flask_cors import CORS, cross_origin
 
 
 with open('app_conf.yml', 'r') as f:
@@ -121,6 +122,8 @@ def init_scheduler():
 
 app = connexion.FlaskApp(__name__, specification_dir='')
 app.add_api("openapi.yaml", strict_validation=True, validate_responses=True)
+CORS(app.app)
+app.app.config['CORS_HEADERS'] = 'Content-Type'
 
 
 if __name__ == "__main__":
