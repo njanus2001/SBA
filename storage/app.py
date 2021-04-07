@@ -2,7 +2,7 @@ import connexion
 from connexion import NoContent
 import json
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
 from base import Base
 from location import Location
@@ -20,6 +20,7 @@ from pykafka.common import OffsetType
 from threading import Thread
 
 import os
+import time
 
 if "TARGET_ENV" in os.environ and os.environ["TARGET_ENV"] == "test":
     print("In Test Environment")
@@ -47,15 +48,16 @@ DB_ENGINE = create_engine(f"mysql+pymysql://{app_config['datastore']['user']}:{a
 Base.metadata.bind = DB_ENGINE
 DB_SESSION = sessionmaker(bind=DB_ENGINE)
 
-def get_gps_location_readings(timestamp):
+def get_gps_location_readings(start_timestamp, end_timestamp):
     """Gets new gps location readings after the timestamp"""
     
     session = DB_SESSION()
 
-    timestamp_datetime = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
-    print(timestamp_datetime)
+    start_timestamp_datetime = datetime.datetime.strptime(start_timestamp, "%Y-%m-%d %H:%M:%S.%f")
+    
+    end_timestamp_datetime = datetime.datetime.strptime(end_timestamp, "%Y-%m-%d %H:%M:%S.%f")
 
-    readings = session.query(Location).filter(Location.date_created >= timestamp_datetime)
+    readings = session.query(Location).filter(and_(Location.date_created >= start_timestamp_datetime, Location.date_created < end_timestamp_datetime))
 
     results_list = []
 
@@ -69,15 +71,16 @@ def get_gps_location_readings(timestamp):
     return results_list, 200
 
 
-def get_gps_waypoint_locations(timestamp):
+def get_gps_waypoint_locations(start_timestamp, end_timestamp):
     """Gets new waypoint location readings after the timestamp"""
     
     session = DB_SESSION()
 
-    timestamp_datetime = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
-    print(timestamp_datetime)
+    start_timestamp_datetime = datetime.datetime.strptime(start_timestamp, "%Y-%m-%d %H:%M:%S.%f")
 
-    readings = session.query(Waypoint).filter(Waypoint.date_created >= timestamp_datetime)
+    end_timestamp_datetime = datetime.datetime.strptime(end_timestamp, "%Y-%m-%d %H:%M:%S.%f")
+
+    readings = session.query(Waypoint).filter(and_(Waypoint.date_created >= start_timestamp_datetime, Waypoint.date_created < end_timestamp_datetime))
 
     results_list = []
 
@@ -95,8 +98,21 @@ def process_messages():
     """ Process event messages """
     hostname = f"{app_config['events']['hostname']}:{app_config['events']['port']}"
 
-    client = KafkaClient(hosts=hostname)
-    topic = client.topics[str.encode(app_config['events']['topic'])]
+    max_retries = int(app_config['events']['max_retries'])
+    sleep_time = int(app_config['events']['sleep_time'])
+    current_retry = 0
+
+    while current_retry < max_retries:
+    	try:
+	    logger.info(f"Trying to connect to Kafka... (Attempt: {current_retry} of {max_retries})")
+    	    client = KafkaClient(hosts=hostname)
+    	    topic = client.topics[str.encode(app_config['events']['topic'])]
+            logger.info("Kafka connection established")
+            break
+    	except Exception:
+	    logger.error(f"Failed to connect to Kafka")
+	    time.sleep(sleep_time)
+	    current_retry += 1
 
     # Create a consume on a cosnumer group, that only reads new messages
     # (uncommitted messages) when the service re-starts (i.e., it doesn't)

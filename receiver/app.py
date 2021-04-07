@@ -36,8 +36,6 @@ def report_gps_location_reading(body):
     
     logger.info(f"Received event report_gps_location_reading request with a unique id of {body['device_id']}")
 
-    client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
-    topic = client.topics[str.encode(f"{app_config['events']['topic']}")]
     producer = topic.get_sync_producer()
 
     msg = { "type": "location",
@@ -57,8 +55,6 @@ def report_gps_waypoint_location(body):
     
     logger.info(f"Received event report_gps_waypoint_location request with a unique id of {body['device_id']}")
 
-    client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
-    topic = client.topics[str.encode(f"{app_config['events']['topic']}")]
     producer = topic.get_sync_producer()
 
     msg = { "type": "waypoint",
@@ -78,4 +74,20 @@ app.add_api("openapi.yaml", strict_validation=True, validate_responses=True)
 
 if __name__ == "__main__":
     """Main function"""
+    max_retries = int(app_config['events']['max_retries'])
+    sleep_time = int(app_config['events']['sleep_time'])
+    current_retry = 0
+
+    while current_retry < max_retries:
+        try:
+            logger.info(f"Trying to connect to Kafka... (Attempt: {current_retry} of {max_retries})")
+            client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
+            topic = client.topics[str.encode(f"{app_config['events']['topic']}")]
+            logger.info("Kafka connection established")
+            break
+        except Exception:
+            logger.error("Failed to connect to Kafka")
+            time.sleep(sleep_time)
+            current_retry += 1
+
     app.run(port=8080)

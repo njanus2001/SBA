@@ -84,8 +84,8 @@ def populate_stats():
     current_datetime = datetime.datetime.now()
 
     # Create GET requests for each event
-    location_response = requests.get(f"{app_config['eventstore']['url']}/readings/location?timestamp={last_updated}")
-    waypoint_response = requests.get(f"{app_config['eventstore']['url']}/readings/waypoint?timestamp={last_updated}")
+    location_response = requests.get(f"{app_config['eventstore']['url']}/readings/location?start_timestamp={last_updated}&end_timestamp={current_datetime}")
+    waypoint_response = requests.get(f"{app_config['eventstore']['url']}/readings/waypoint?start_timestamp={last_updated}&end_timestamp={current_datetime}")
     
     # Log any error status codes returned
     for response in [location_response, waypoint_response]:

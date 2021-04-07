@@ -17,13 +17,20 @@ paths:
       operationId: app.get_gps_location_readings
       description: Gets gps location readings added after the given timestamp
       parameters:
-        - name: timestamp
+        - name: start_timestamp
           in: query
           description: Limits the number of items on a page
           schema:
             type: string
             format: date-time
             example: 2012-05-10T10:20:25.000Z
+	- name: end_timestamp
+	  in: query
+	  description: Limits the number of items on a page
+	  schema:
+	    type: string
+	    format: date-time
+	    example: 2021-05-10T10:20:25.000Z
       responses:
         '200':
           description: Successfully returned a list of gps location events
@@ -51,7 +58,14 @@ paths:
       operationId: app.get_gps_waypoint_locations
       description: Gets gps waypoint location readings added after the given timestamp
       parameters:
-        - name: timestamp
+        - name: start_timestamp
+          in: query
+          description: Limits the number of items on a page
+          schema:
+            type: string
+            format: date-time
+            example: 2012-05-10T10:20:25.000Z
+	- name: end_timestamp
           in: query
           description: Limits the number of items on a page
           schema:
