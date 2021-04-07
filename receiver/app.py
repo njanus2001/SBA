@@ -32,6 +32,22 @@ logger = logging.getLogger('basicLogger')
 logger.info(f"App Conf File: {app_conf_file}")
 logger.info(f"Log Conf File: {log_conf_file}")
 
+max_retries = int(app_config['events']['max_retries'])
+sleep_time = int(app_config['events']['sleep_time'])
+current_retry = 0
+
+while current_retry < max_retries:
+    try:
+        logger.info(f"Trying to connect to Kafka... (Attempt: {current_retry} of {max_retries})")
+        client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
+        topic = client.topics[str.encode(f"{app_config['events']['topic']}")]
+        logger.info("Kafka connection established")
+        break
+    except Exception:
+        logger.error("Failed to connect to Kafka")
+        time.sleep(sleep_time)
+        current_retry += 1
+
 def report_gps_location_reading(body):
     """Returns current GPS location reading of a given user"""
     
@@ -75,20 +91,4 @@ app.add_api("openapi.yaml", strict_validation=True, validate_responses=True)
 
 if __name__ == "__main__":
     """Main function"""
-    max_retries = int(app_config['events']['max_retries'])
-    sleep_time = int(app_config['events']['sleep_time'])
-    current_retry = 0
-
-    while current_retry < max_retries:
-        try:
-            logger.info(f"Trying to connect to Kafka... (Attempt: {current_retry} of {max_retries})")
-            client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
-            topic = client.topics[str.encode(f"{app_config['events']['topic']}")]
-            logger.info("Kafka connection established")
-            break
-        except Exception:
-            logger.error("Failed to connect to Kafka")
-            time.sleep(sleep_time)
-            current_retry += 1
-
     app.run(port=8080)
