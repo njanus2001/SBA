@@ -75,8 +75,8 @@ app.add_api("openapi.yaml", strict_validation=True, validate_responses=True)
 
 if __name__ == "__main__":
     """Main function"""
-    max_retries = int(app_config['connections']['kafka']['max_retries'])
-    sleep_time = int(app_config['connections']['kafka']['sleep_time'])
+    max_retries = int(app_config['events']['max_retries'])
+    sleep_time = int(app_config['events']['sleep_time'])
     current_retry = 0
 
     while current_retry < max_retries:
