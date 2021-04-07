@@ -7,5 +7,5 @@ events:
   hostname: njanus.eastus2.cloudapp.azure.com
   port: 9092
   topic: events
-  max_retries = 10
-  sleep_time = 5
+  max_retries: 10
+  sleep_time: 5
