@@ -66,7 +66,7 @@ def get_gps_location_readings(start_timestamp, end_timestamp):
 
     session.close()
 
-    logger.info(f"Query for Location readings after {timestamp} returns {len(results_list)}")
+    logger.info(f"Query for Location readings after {start_timestamp} returns {len(results_list)}")
 
     return results_list, 200
 
@@ -89,7 +89,7 @@ def get_gps_waypoint_locations(start_timestamp, end_timestamp):
 
     session.close()
 
-    logger.info(f"Query for Waypoint readings after {timestamp} returns {len(results_list)}")
+    logger.info(f"Query for Waypoint readings after {start_timestamp} returns {len(results_list)}")
 
     return results_list, 200
     
@@ -103,16 +103,16 @@ def process_messages():
     current_retry = 0
 
     while current_retry < max_retries:
-    	try:
-	    logger.info(f"Trying to connect to Kafka... (Attempt: {current_retry} of {max_retries})")
-    	    client = KafkaClient(hosts=hostname)
-    	    topic = client.topics[str.encode(app_config['events']['topic'])]
+        try:
+            logger.info(f"Trying to connect to Kafka... (Attempt: {current_retry} of {max_retries})")
+            client = KafkaClient(hosts=hostname)
+            topic = client.topics[str.encode(app_config['events']['topic'])]
             logger.info("Kafka connection established")
             break
-    	except Exception:
-	    logger.error(f"Failed to connect to Kafka")
-	    time.sleep(sleep_time)
-	    current_retry += 1
+        except Exception:
+            logger.error(f"Failed to connect to Kafka")
+            time.sleep(sleep_time)
+            current_retry += 1
 
     # Create a consume on a cosnumer group, that only reads new messages
     # (uncommitted messages) when the service re-starts (i.e., it doesn't)
