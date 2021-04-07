@@ -21,3 +21,7 @@ loggers:
 root:
   level: DEBUG
   handlers: [console]
+connections:
+  kafka:
+    max_retries: 10
+    sleep_time: 5
