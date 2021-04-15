@@ -41,6 +41,7 @@ while current_retry < max_retries:
         logger.info(f"Trying to connect to Kafka... (Attempt: {current_retry} of {max_retries})")
         client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
         topic = client.topics[str.encode(f"{app_config['events']['topic']}")]
+        producer = topic.get_sync_producer()
         logger.info("Kafka connection established")
         break
     except Exception:
@@ -52,8 +53,6 @@ def report_gps_location_reading(body):
     """Returns current GPS location reading of a given user"""
     
     logger.info(f"Received event report_gps_location_reading request with a unique id of {body['device_id']}")
-
-    producer = topic.get_sync_producer()
 
     msg = { "type": "location",
             "datetime": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
@@ -71,8 +70,6 @@ def report_gps_waypoint_location(body):
     """Returns all waypoint location readings of a given user"""
     
     logger.info(f"Received event report_gps_waypoint_location request with a unique id of {body['device_id']}")
-
-    producer = topic.get_sync_producer()
 
     msg = { "type": "waypoint",
             "datetime": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
